@@ -9,31 +9,48 @@ from PySide2.QtWidgets import (QAction, QApplication, QLabel, QLineEdit,
 
 
 class JsonTreeWidget(QTreeWidget):
-    def __init__(self):
+    def __init__(self, data):
         super().__init__()
+        self.data = data
+
         self.setColumnCount(2)
         self.setHeaderLabels(['path', 'value'])
-        self.header().setSectionResizeMode(0, QHeaderView.Stretch)
-        # self.header().setSectionResizeMode(1, QHeaderView.ResizeToContents)
+        # self.header().setSectionResizeMode(0, QHeaderView.Stretch)
+        self.header().setSectionResizeMode(0, QHeaderView.ResizeToContents)
         # self.header().setStretchLastSection(False)
+
+        self.add_object(data)
+        self.expandAll()
+
+    def add_object(self, obj, parent=None):
+        if parent is None:
+            parent = self
+
+        if isinstance(obj, dict):
+            for k, v in obj.items():
+                if isinstance(v, (list, dict)):
+                    item = QTreeWidgetItem(parent, [k])
+                    self.add_object(v, item)
+                else:
+                    # TODO Fix label so it works for numbers rather than just str(v)
+                    item = QTreeWidgetItem(parent, [k, str(v)])
+        elif isinstance(obj, list):
+            for index, element in enumerate(obj):
+                if isinstance(element, (list, dict)):
+                    item = QTreeWidgetItem(parent, [str(index)])
+                    self.add_object(element, item)
+                else:
+                    item = QTreeWidgetItem(parent, [str(index), str(element)])
+        else:
+            item = QTreeWidgetItem(parent, [str(obj)])
+            raise ValueError("Tree add_object expects a collection")
 
 
 class ExplorerWidget(QWidget):
     def __init__(self, data):
         super().__init__()
 
-        self.items = 0
-        self.data = data
-        self.tree = JsonTreeWidget()
-
-        # testing
-        tree_top = [
-            QTreeWidgetItem(self.tree, ['foo']),
-            QTreeWidgetItem(self.tree, ['bar']),
-            QTreeWidgetItem(self.tree, ['baz']),
-        ]
-        tree_top[0].addChild(QTreeWidgetItem(['child', 'value']))
-        tree_top[1].addChild(QTreeWidgetItem(['child2', 'value of something really big and should hopefully wrap']))
+        self.tree = JsonTreeWidget(data)
 
         self.quit = QPushButton("Quit")
         self.search_box = QLineEdit()
