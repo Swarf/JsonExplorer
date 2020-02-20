@@ -130,3 +130,7 @@ dmypy.json
 
 # IDE
 .idea
+
+# js
+node_modules/
+dist/

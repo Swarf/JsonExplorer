@@ -1,0 +1,11 @@
+.title {
+  font-family: "Arial Black", sans-serif;
+  font-size: 30px;
+  font-weight: bold;
+}
+
+#main_content {
+  padding: 20px;
+  /*background-color: lightslategrey;*/
+}
+
